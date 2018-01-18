@@ -3,9 +3,11 @@ Module to manage sending emails
 """
 from os import environ as env
 import requests
-from noticeboard_scraper import scrape
+from scrapers.internal_scraper import scrape_internal
+from scrapers.public_scraper import scrape_public
 
-import settings
+from settings import load_env
+load_env()
 
 REQUESTS_SESSION = requests.Session()
 
@@ -20,7 +22,8 @@ def send_mail():
     """
     Method to send mail
     """
-    all_notices = scrape()
+    new_notices = scrape_internal()
+    new_notices += scrape_public()
     mailgun_base_url = 'https://api.mailgun.net/v3/%s' % env['MAILGUN_DOMAIN']
     data = {
         'from': (None, 'Hermes <no-reply@%s>' % env['MAILGUN_DOMAIN']),
@@ -28,8 +31,8 @@ def send_mail():
         'to': (None, 'ghostwriternr@gmail.com')
     }
 
-    for section in all_notices:
-        for notice in all_notices[section]:
+    for section in new_notices:
+        for notice in new_notices[section]:
             files = []
             data['subject'] = (None, notice['title'])
             data['text'] = (None, notice['text'])

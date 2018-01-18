@@ -1,17 +1,26 @@
 """
-Scraper for the UG Notice board
+Scraper for IITKGP internal notice boards
+http://noticeboard.iitkgp.ernet.in/
 """
-from os import environ as env
+from os import path, environ as env
 from urllib.parse import urljoin
 import hashlib
 from bs4 import BeautifulSoup
 import requests
 from pymongo import MongoClient
 
-import settings
+if __package__ is None:
+    import sys
+    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+    from settings import load_env
+else:
+    from ..settings import load_env
+
+load_env()
 
 MC = MongoClient(env['MONGODB_URI'])
 REQUESTS_SESSION = requests.Session()
+DIFF_NOTICES = 10
 
 BASE_URL = 'http://noticeboard.iitkgp.ernet.in/'
 SUB_URLS = [
@@ -66,6 +75,7 @@ def scrape_noticeboard(section):
     requests_response = REQUESTS_SESSION.get(BASE_URL + section)
     soup = BeautifulSoup(requests_response.text, "html.parser")
     notices = []
+    diffed_notices = 0
     while True:
         noticeboard = soup.find('td', {'valign': 'top'}).find('table')
         all_notices = noticeboard.find_all('tr')
@@ -77,6 +87,10 @@ def scrape_noticeboard(section):
                 notice_url = BASE_URL + section + notice_url
                 notice_json = scrape_notice(notice_url, section, notice_has_attachment)
                 notices.append(notice_json)
+                diffed_notices += 1
+                if env['FIRST_RUN'] == 'false' and diffed_notices == DIFF_NOTICES:
+                    new_notices = handle_notices_diff(section, notices)
+                    return new_notices
         try:
             next_page = all_notices[-1].find(
                 'font', {'class': 'text'}).find('a', {'class': 'notice'})
@@ -88,7 +102,7 @@ def scrape_noticeboard(section):
     new_notices = handle_notices_diff(section, notices)
     return new_notices
 
-def scrape():
+def scrape_internal():
     """
     Scrape method for all noticeboard sections
     """
@@ -99,4 +113,4 @@ def scrape():
     return new_notices
 
 if __name__ == "__main__":
-    scrape()
+    scrape_internal()
