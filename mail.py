@@ -7,11 +7,13 @@ from noticeboard_scraper import scrape
 
 import settings
 
+REQUESTS_SESSION = requests.Session()
+
 def get_attachment(attachment_url):
     """
     Return PDF given attachment URL
     """
-    response = requests.get(attachment_url)
+    response = REQUESTS_SESSION.get(attachment_url)
     return response.content
 
 def send_mail():
@@ -31,10 +33,10 @@ def send_mail():
             files = []
             data['subject'] = (None, notice['title'])
             data['text'] = (None, notice['text'])
-            if notice['attachment']:
+            if 'attachment' in notice:
                 attachment_name = notice['attachment'].split('/')[-1]
                 files = [('attachment', (attachment_name, get_attachment(notice['attachment'])))]
-            response = requests.post(
+            response = REQUESTS_SESSION.post(
                 mailgun_base_url + '/messages',
                 data=data,
                 auth=('api', env['MAILGUN_API_KEY']),
