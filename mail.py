@@ -2,6 +2,7 @@
 Module to manage sending emails
 """
 from os import environ as env
+from datetime import datetime
 import requests
 
 from scrapers import internal_scraper, public_scraper
@@ -30,6 +31,13 @@ def send_mail():
     """
     Method to send mail
     """
+    print(
+        """
+        **************************************
+        %s
+        **************************************
+        """ % datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
+    )
     new_notices = get_new_notices()
     mailgun_base_url = 'https://api.mailgun.net/v3/%s' % env['MAILGUN_DOMAIN']
     data = {

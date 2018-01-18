@@ -15,7 +15,7 @@ SCHEDULER.start()
 SCHEDULER.add_job(
     func=send_mail,
     trigger=IntervalTrigger(minutes=1),
-    id='scraper_job',
+    id='send_mail',
     name='Poll IIT KGP\'s internal noticeboards every one minute',
     replace_existing=True)
 # Shut down the scheduler when exiting the app
