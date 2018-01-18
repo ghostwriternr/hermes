@@ -12,16 +12,15 @@ from pymongo import MongoClient
 if __package__ is None:
     import sys
     sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-    from settings import load_env
+    from settings import load_env # pylint: disable-msg=E0611
 else:
-    from ..settings import load_env
+    from .settings import load_env
 
 load_env()
 
 MC = MongoClient(env['MONGODB_URI'])
 REQUESTS_SESSION = requests.Session()
 DIFF_NOTICES = 10
-FIRST_RUN = False
 
 BASE_URL = 'http://www.iitkgp.ac.in/for-students'
 
@@ -64,7 +63,9 @@ def scrape_public():
     """
     Scrape method for public noticeboard
     """
+    print("Beginning to scrape public noticeboard")
     all_notices = []
+    diffed_notices = 0
     requests_response = REQUESTS_SESSION.get(BASE_URL)
     soup = BeautifulSoup(requests_response.text, "html.parser")
     noticeboard = soup.find('div', {'class': 'right_box'})
@@ -75,7 +76,12 @@ def scrape_public():
         notice_json = scrape_notice(notice_url)
         notice_json['title'] = notice_title
         all_notices.append(notice_json)
+        diffed_notices += 1
+        if env['FIRST_RUN'] == 'false' and diffed_notices == DIFF_NOTICES:
+            break
     new_notices = handle_notices_diff(all_notices)
+    print("Found %d new notices in public noticeboard (%d checked)" % (
+        len(new_notices), diffed_notices))
     return new_notices
 
 

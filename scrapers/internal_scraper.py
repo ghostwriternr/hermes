@@ -12,9 +12,9 @@ from pymongo import MongoClient
 if __package__ is None:
     import sys
     sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-    from settings import load_env
+    from settings import load_env # pylint: disable-msg=E0611
 else:
-    from ..settings import load_env
+    from .settings import load_env
 
 load_env()
 
@@ -76,7 +76,9 @@ def scrape_noticeboard(section):
     soup = BeautifulSoup(requests_response.text, "html.parser")
     notices = []
     diffed_notices = 0
+    page_number = 1
     while True:
+        print("Currently at page ", page_number)
         noticeboard = soup.find('td', {'valign': 'top'}).find('table')
         all_notices = noticeboard.find_all('tr')
         for notice in all_notices:
@@ -90,24 +92,31 @@ def scrape_noticeboard(section):
                 diffed_notices += 1
                 if env['FIRST_RUN'] == 'false' and diffed_notices == DIFF_NOTICES:
                     new_notices = handle_notices_diff(section, notices)
+                    print("Found %d new notices in %s (%d checked)" % (
+                        len(new_notices), section.split('/')[0], diffed_notices))
                     return new_notices
         try:
             next_page = all_notices[-1].find(
                 'font', {'class': 'text'}).find('a', {'class': 'notice'})
             next_page_url = next_page.get('href')
+            page_number += 1
             soup = BeautifulSoup(REQUESTS_SESSION.get(
                 urljoin(BASE_URL, next_page_url)).text, "html.parser")
         except AttributeError:
             break
     new_notices = handle_notices_diff(section, notices)
+    print("Found %d new notices in %s (%d checked)" % (
+        len(new_notices), section.split('/')[0], diffed_notices))
     return new_notices
 
 def scrape_internal():
     """
     Scrape method for all noticeboard sections
     """
+    print("Beginning to scrape internal noticeboards")
     new_notices = {}
     for section in SUB_URLS:
+        print("Scraping %s" % section.split('/')[0])
         section_notices = scrape_noticeboard(section)
         new_notices[section.split('/')[0]] = section_notices
     return new_notices

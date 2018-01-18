@@ -6,8 +6,7 @@ from flask import Flask, jsonify
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
-from noticeboard_scraper import scrape
-from mail import send_mail
+from mail import send_mail, get_new_notices
 
 APP = Flask(__name__)
 
@@ -27,7 +26,7 @@ def index():
     """
     Handle http request to root
     """
-    return jsonify(Notices=scrape())
+    return jsonify(Notices=get_new_notices())
 
 if __name__ == "__main__":
     APP.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)
