@@ -50,10 +50,11 @@ def send_mail():
         for notice in new_notices[section]:
             files = []
             data['subject'] = (None, notice['title'])
-            data['text'] = (None, notice['text'])
+            data['html'] = (None, notice['html'])
             if 'attachment' in notice:
                 attachment_name = notice['attachment'].split('/')[-1]
                 files = [('attachment', (attachment_name, get_attachment(notice['attachment'])))]
+            print(data)
             response = REQUESTS_SESSION.post(
                 mailgun_base_url + '/messages',
                 data=data,

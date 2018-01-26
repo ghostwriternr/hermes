@@ -39,10 +39,13 @@ def scrape_notice(notice_url):
             for chunk in iter(lambda: attachment_response.raw.read(4096), b""):
                 hash_md5.update(chunk)
             notice_json['attachment_md5'] = hash_md5.hexdigest()
+            notice_json['html'] = '<div></div>'
             notice_json['text'] = ''
         elif 'text/html' in requests_response.headers['Content-Type']:
+            notice_json['html'] = '<div>' + notice_url + '</div>'
             notice_json['text'] = notice_url
     except KeyError:
+        notice_json['html'] = '<div></div>'
         notice_json['text'] = ''
     return notice_json
 
@@ -52,7 +55,7 @@ def handle_notices_diff(notices):
     """
     new_notices = []
     public_coll = MC.get_database()['public']
-    for notice in notices:
+    for notice in reversed(notices):
         db_notice = public_coll.find_one(notice)
         if db_notice is None:
             new_notices.append(notice)

@@ -39,11 +39,13 @@ def scrape_notice(notice_url, section, notice_has_attachment):
     notice_details = notice[0].find_all('td')
     notice_title = notice_details[0].get_text()
     notice_time = notice_details[1].get_text()
+    notice_html = notice[1].find('div')
     notice_text = notice[1].find('div').get_text()
     notice_json = {}
     notice_json['title'] = notice_title
     notice_json['time'] = notice_time.strip()
     notice_json['text'] = notice_text
+    notice_json['html'] = notice_html.encode("utf-8")
     hash_md5 = hashlib.md5()
     if notice_has_attachment:
         notice_attachment = notice[1].find('a').get('href')
@@ -61,7 +63,7 @@ def handle_notices_diff(section, notices):
     """
     new_notices = []
     section_coll = MC.get_database()[section.split('/')[0]]
-    for notice in notices:
+    for notice in reversed(notices):
         db_notice = section_coll.find_one(notice)
         if db_notice is None:
             new_notices.append(notice)
