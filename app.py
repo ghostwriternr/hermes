@@ -9,7 +9,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from bson import ObjectId
 
 from mail import send_mail
-from models import get_all_latest
+from models import get_type_latest, get_all_latest
 
 APP = Flask(__name__)
 
@@ -34,12 +34,21 @@ SCHEDULER.add_job(
     replace_existing=True)
 atexit.register(lambda: SCHEDULER.shutdown()) # pylint: disable=W0108
 
-@APP.route('/')
+@APP.route('/', methods=['GET'])
 def index():
     """
     Handle http request to root
     """
-    notices = get_all_latest(3)
+    notices = get_all_latest()
+    notices = JSONEncoder().encode(notices)
+    return jsonify(Notices=json.loads(notices))
+
+@APP.route('/<string:noticeboard>', methods=['GET'])
+def get_type(noticeboard):
+    """
+    Handle http request for specific type
+    """
+    notices = get_type_latest(noticeboard)
     notices = JSONEncoder().encode(notices)
     return jsonify(Notices=json.loads(notices))
 
