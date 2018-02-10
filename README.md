@@ -17,6 +17,7 @@ MAILGUN_API_KEY="xxx" # API key from Mailgun dashboard
 MAILGUN_DOMAIN="xxx" # Configured domain at Mailgun from which to send emails
 FIRST_RUN="false" # Set to either "true" or "false". If true, the scrapers will check ALL notices. Only last 10 otherwise.
 TARGET_EMAIL="xxx" # Target email address
+VERITAS_URL="xxx" # URL for Veritas
 ```
 
 ## License
