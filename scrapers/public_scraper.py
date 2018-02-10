@@ -3,11 +3,11 @@ Scraper for IITKGP's public student notice board
 http://www.iitkgp.ac.in/for-students
 """
 from os import path, environ as env
+import json
 from urllib.parse import urljoin
 import hashlib
 from bs4 import BeautifulSoup
 import requests
-from pymongo import MongoClient
 
 if __package__ is None:
     import sys
@@ -18,7 +18,6 @@ else:
 
 load_env()
 
-MC = MongoClient(env['MONGODB_URI'])
 REQUESTS_SESSION = requests.Session()
 DIFF_NOTICES = 10
 
@@ -53,13 +52,8 @@ def handle_notices_diff(notices):
     """
     Method to check for new/updated notices
     """
-    new_notices = []
-    public_coll = MC.get_database()['public']
-    for notice in reversed(notices):
-        db_notice = public_coll.find_one(notice)
-        if db_notice is None:
-            new_notices.append(notice)
-            public_coll.insert_one(notice)
+    new_notices = REQUESTS_SESSION.post(urljoin(env['VERITAS_URL'], "diff/public"), json=notices)
+    new_notices = json.loads(new_notices.json())
     return new_notices
 
 def scrape_public():
@@ -85,6 +79,7 @@ def scrape_public():
     new_notices = handle_notices_diff(all_notices)
     print("Found %d new notices in public noticeboard (%d checked)" % (
         len(new_notices), diffed_notices))
+    print(new_notices)
     return new_notices
 
 

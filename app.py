@@ -1,28 +1,21 @@
 """
 Main flask process
 """
+from os import environ as env
 import json
 import atexit
 from flask import Flask, jsonify
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-from bson import ObjectId
+import requests
 
 from mail import send_mail
-from models import get_type_latest, get_all_latest
+from scrapers.settings import load_env
+
+load_env()
 
 APP = Flask(__name__)
-
-class JSONEncoder(json.JSONEncoder):
-    """
-    Class to convert ObjectId types to string
-    """
-    def default(self, o): # pylint: disable=E0202
-        if isinstance(o, ObjectId):
-            return str(o)
-        elif isinstance(o, bytes):
-            return o.decode("utf-8")
-        return json.JSONEncoder.default(self, o)
+REQUESTS_SESSION = requests.Session()
 
 SCHEDULER = BackgroundScheduler()
 SCHEDULER.start()
@@ -39,18 +32,16 @@ def index():
     """
     Handle http request to root
     """
-    notices = get_all_latest()
-    notices = JSONEncoder().encode(notices)
-    return jsonify(Notices=json.loads(notices))
+    notices = REQUESTS_SESSION.get(env['VERITAS_URL'])
+    return jsonify(notices.json())
 
 @APP.route('/<string:noticeboard>', methods=['GET'])
 def get_type(noticeboard):
     """
     Handle http request for specific type
     """
-    notices = get_type_latest(noticeboard)
-    notices = JSONEncoder().encode(notices)
-    return jsonify(Notices=json.loads(notices))
+    notices = REQUESTS_SESSION.get(env['VERITAS_URL'] + noticeboard)
+    return jsonify(notices.json())
 
 if __name__ == "__main__":
-    APP.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)
+    APP.run(debug=True, host='0.0.0.0', port=5010, use_reloader=False)

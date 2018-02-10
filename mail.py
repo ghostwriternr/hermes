@@ -46,6 +46,7 @@ def send_mail():
         'to': (None, env['TARGET_EMAIL'])
     }
 
+    print(new_notices)
     for section in new_notices:
         for notice in new_notices[section]:
             files = []

@@ -3,6 +3,7 @@ Scraper for IITKGP internal notice boards
 http://noticeboard.iitkgp.ernet.in/
 """
 from os import path, environ as env
+import json
 from urllib.parse import urljoin
 import hashlib
 from bs4 import BeautifulSoup
@@ -45,7 +46,7 @@ def scrape_notice(notice_url, section, notice_has_attachment):
     notice_json['title'] = notice_title
     notice_json['time'] = notice_time.strip()
     notice_json['text'] = notice_text
-    notice_json['html'] = notice_html.encode("utf-8")
+    notice_json['html'] = str(notice_html)
     hash_md5 = hashlib.md5()
     if notice_has_attachment:
         notice_attachment = notice[1].find('a').get('href')
@@ -61,13 +62,9 @@ def handle_notices_diff(section, notices):
     """
     Method to check for new/updated notices
     """
-    new_notices = []
-    section_coll = MC.get_database()[section.split('/')[0]]
-    for notice in reversed(notices):
-        db_notice = section_coll.find_one(notice)
-        if db_notice is None:
-            new_notices.append(notice)
-            section_coll.insert_one(notice)
+    section = section.split('/')[0]
+    new_notices = REQUESTS_SESSION.post(urljoin(env['VERITAS_URL'], "diff/" + section), json=notices)
+    new_notices = json.loads(new_notices.json())
     return new_notices
 
 def scrape_noticeboard(section):
@@ -109,6 +106,7 @@ def scrape_noticeboard(section):
     new_notices = handle_notices_diff(section, notices)
     print("Found %d new notices in %s (%d checked)" % (
         len(new_notices), section.split('/')[0], diffed_notices))
+    print(new_notices)
     return new_notices
 
 def scrape_internal():
