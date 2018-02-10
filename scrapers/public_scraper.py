@@ -1,13 +1,18 @@
+# -*- coding: utf-8 -*-
 """
 Scraper for IITKGP's public student notice board
 http://www.iitkgp.ac.in/for-students
 """
+from __future__ import print_function
 from os import path, environ as env
 import json
-from urllib.parse import urljoin
 import hashlib
 from bs4 import BeautifulSoup
 import requests
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
 
 if __package__ is None:
     import sys
@@ -79,7 +84,6 @@ def scrape_public():
     new_notices = handle_notices_diff(all_notices)
     print("Found %d new notices in public noticeboard (%d checked)" % (
         len(new_notices), diffed_notices))
-    print(new_notices)
     return new_notices
 
 

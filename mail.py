@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 """
 Module to manage sending emails
 """
+from __future__ import print_function
 from os import environ as env
 from datetime import datetime
 import requests
@@ -46,7 +48,6 @@ def send_mail():
         'to': (None, env['TARGET_EMAIL'])
     }
 
-    print(new_notices)
     for section in new_notices:
         for notice in new_notices[section]:
             files = []

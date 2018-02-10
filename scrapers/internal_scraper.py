@@ -1,14 +1,19 @@
+# -*- coding: utf-8 -*-
 """
 Scraper for IITKGP internal notice boards
 http://noticeboard.iitkgp.ernet.in/
 """
+from __future__ import print_function
 from os import path, environ as env
 import json
-from urllib.parse import urljoin
 import hashlib
 from bs4 import BeautifulSoup
 import requests
 from pymongo import MongoClient
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
 
 if __package__ is None:
     import sys
@@ -106,7 +111,6 @@ def scrape_noticeboard(section):
     new_notices = handle_notices_diff(section, notices)
     print("Found %d new notices in %s (%d checked)" % (
         len(new_notices), section.split('/')[0], diffed_notices))
-    print(new_notices)
     return new_notices
 
 def scrape_internal():
