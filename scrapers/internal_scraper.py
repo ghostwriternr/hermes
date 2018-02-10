@@ -9,7 +9,6 @@ import json
 import hashlib
 from bs4 import BeautifulSoup
 import requests
-from pymongo import MongoClient
 try:
     from urllib.parse import urljoin
 except ImportError:
@@ -24,7 +23,6 @@ else:
 
 load_env()
 
-MC = MongoClient(env['MONGODB_URI'])
 REQUESTS_SESSION = requests.Session()
 DIFF_NOTICES = 10
 
