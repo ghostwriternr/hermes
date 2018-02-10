@@ -8,7 +8,7 @@ apscheduler == 3.5.1
 bs4 == 0.0.1
 
 # settings.py: 5
-dotenv == 0.0.5
+python-dotenv == 0.7.1
 
 # app.py: 5
 flask == 0.12.2
