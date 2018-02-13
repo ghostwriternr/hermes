@@ -27,11 +27,11 @@ REQUESTS_SESSION = requests.Session()
 DIFF_NOTICES = 10
 
 BASE_URL = 'http://noticeboard.iitkgp.ernet.in/'
-SUB_URLS = [
-    'acad_ug/',
-    'acad_pg/',
-    'bcrth/'
-]
+SUB_URLS = {
+    'acad_ug/': "UG",
+    'acad_pg/': "PG",
+    "bcrth/": "BC Roy"
+}
 
 def scrape_notice(notice_url, section, notice_has_attachment):
     """
@@ -46,7 +46,7 @@ def scrape_notice(notice_url, section, notice_has_attachment):
     notice_html = notice[1].find('div')
     notice_text = notice[1].find('div').get_text()
     notice_json = {}
-    notice_json['title'] = notice_title
+    notice_json['title'] = "%s notice: %s" % (SUB_URLS[section], notice_title)
     notice_json['time'] = notice_time.strip()
     notice_json['text'] = notice_text
     notice_json['html'] = str(notice_html)

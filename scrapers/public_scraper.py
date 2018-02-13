@@ -76,7 +76,7 @@ def scrape_public():
         notice_title = notice.get_text()
         notice_url = urljoin(BASE_URL, notice.find('a').get('href'))
         notice_json = scrape_notice(notice_url)
-        notice_json['title'] = notice_title
+        notice_json['title'] = "%s notice: %s" % ("General", notice_title)
         all_notices.append(notice_json)
         diffed_notices += 1
         if env['FIRST_RUN'] == 'false' and diffed_notices == DIFF_NOTICES:
