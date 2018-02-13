@@ -40,12 +40,12 @@ def send_mail():
         **************************************
         """ % datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
     )
+    target_emails = [target.strip() for target in env['TARGET_EMAIL'].split(',')]
     new_notices = get_new_notices()
     mailgun_base_url = 'https://api.mailgun.net/v3/%s' % env['MAILGUN_DOMAIN']
     data = {
         'from': (None, 'Hermes <no-reply@%s>' % env['MAILGUN_DOMAIN']),
-        'fromname': (None, 'Hermes'),
-        'to': (None, env['TARGET_EMAIL'])
+        'fromname': (None, 'Hermes')
     }
 
     for section in new_notices:
@@ -57,13 +57,15 @@ def send_mail():
                 attachment_name = notice['attachment'].split('/')[-1]
                 files = [('attachment', (attachment_name, get_attachment(notice['attachment'])))]
             print(data)
-            response = REQUESTS_SESSION.post(
-                mailgun_base_url + '/messages',
-                data=data,
-                auth=('api', env['MAILGUN_API_KEY']),
-                files=files
-            )
-            print(response.text)
+            for target in target_emails:
+                data['to'] = (None, target)
+                response = REQUESTS_SESSION.post(
+                    mailgun_base_url + '/messages',
+                    data=data,
+                    auth=('api', env['MAILGUN_API_KEY']),
+                    files=files
+                )
+                print(response.text)
 
 if __name__ == "__main__":
     send_mail()
