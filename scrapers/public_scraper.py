@@ -33,7 +33,7 @@ def scrape_notice(notice_url):
     Scrape method for each notice
     """
     notice_json = {}
-    requests_response = REQUESTS_SESSION.get(notice_url)
+    requests_response = REQUESTS_SESSION.get(notice_url, allow_redirects=False)
     try:
         if requests_response.headers['Content-Type'] == 'application/pdf':
             hash_md5 = hashlib.md5()
