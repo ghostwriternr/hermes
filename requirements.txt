@@ -2,4 +2,4 @@ requests==2.20.0
 apscheduler==3.5.3
 beautifulsoup4==4.6.3
 python-dotenv==0.9.1
-Flask==1.0.2
+Flask==2.3.2
